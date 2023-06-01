@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://code.highcharts.com/stock/highstock.js"></script>
+        <script src="https://code.highcharts.com/stock/indicators/indicators.js"></script>
+        <script src="https://code.highcharts.com/stock/indicators/volume-by-price.js"></script>
+        <script>
+            async function getHistoricalChart(symbol) {
+                let toTimestamp = Math.floor(Date.now() / 1000) ;
+                let fromTimestamp = toTimestamp - 2 * 365 * 24 * 60 * 60;
+                let response = await fetch(`https://csci571hw8-chiahaol.appspot.com/finnhub/stockCandles?symbol=${symbol}&fromTimestamp=${fromTimestamp}&toTimestamp=${toTimestamp}&resolution=D`);
+                let data = await response.json();
+                let ohlc = data.t.map((timestamp, i) => [timestamp * 1000, data.o[i], data.h[i], data.l[i], data.c[i]]);
+                let volume = data.t.map((timestamp, i) => [timestamp * 1000, data.v[i]]);
+                
+                Highcharts.stockChart("chart", {
+                    title: {
+                              text: `${symbol} Historical`
+                          },
+                          subtitle: {
+                              text: 'With SMA and Volume by Price technical indicators'
+                          },
+                          xAxis: {
+                            type: 'datetime',
+                            labels: {
+                              format: "{value: %b '%y}"
+                            }
+                          },
+                          yAxis: [{
+                              opposite: true,
+                              startOnTick: false,
+                              endOnTick: false,
+                              labels: {
+                                  align: 'right',
+                                  x: -3
+                              },
+                              title: {
+                                  text: 'OHLC'
+                              },
+                              height: '60%',
+                              lineWidth: 2,
+                              resize: {
+                                  enabled: true
+                              }
+                          }, {
+                              opposite: true,
+                              labels: {
+                                  align: 'right',
+                                  x: -3
+                              },
+                              title: {
+                                  text: 'Volume'
+                              },
+                              top: '65%',
+                              height: '35%',
+                              offset: 0,
+                              lineWidth: 2
+                          }],
+
+                          tooltip: {
+                              split: true
+                          },
+
+                          plotOptions: {
+                          },
+
+                          series: [{
+                              type: 'candlestick',
+                              name: symbol,
+                              id: 'ohlc',
+                              zIndex: 2,
+                              data: ohlc,
+                              showInLegend: false,
+                          }, {
+                              type: 'column',
+                              name: 'Volume',
+                              id: 'volume',
+                              data: volume,
+                              yAxis: 1,
+                              showInLegend: false,
+                          }, {
+                              type: 'vbp',
+                              linkedTo: 'ohlc',
+                              params: {
+                                  volumeSeriesID: 'volume'
+                              },
+                              dataLabels: {
+                                  enabled: false
+                              },
+                              zoneLines: {
+                                  enabled: false
+                              }
+                          }, {
+                              type: 'sma',
+                              linkedTo: 'ohlc',
+                              zIndex: 1,
+                              marker: {
+                                  enabled: false
+                              }
+                          }],
+                          navigator: {
+                            enabled: true,
+                            xAxis: {
+                                type: 'datetime',
+                                labels: {
+                                  format: "{value: %Y}"
+                                }
+                            }
+                          },
+                          rangeSelector: {
+                            enabled: true,
+                            selected: 2,
+                            inputDateFormat: '%b %e, %Y'
+                          },
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <div id="chart"></div>
+    </body>
+</html>

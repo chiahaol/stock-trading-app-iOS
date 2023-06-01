@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <script src="https://code.highcharts.com/highcharts.js"></script>
+        <script>
+            async function getEPSChart(symbol) {
+                let response = await fetch(`https://csci571hw8-chiahaol.appspot.com/finnhub/earnings?symbol=${symbol}`);
+                let data = await response.json();
+                let actual = data.map(obj => obj.actual ? obj.actual : 0)
+                let estimate = data.map(obj => obj.estimate ? obj.estimate : 0)
+                let surprise = data.map(obj => obj.surprise ? obj.surprise : 0)
+                let category = data.map(obj => `${obj.period}<br>Surprise: ${obj.surprise}`)
+                
+                Highcharts.chart("chart", {
+                  title: {
+                      text: `Historical EPS Surprises`
+                  },
+                  plotOptions: {
+                    line: {
+                      color: '#fd0808',
+                    }
+                  },
+                  xAxis: {
+                    categories: category
+                  },
+                  yAxis: {
+                    title: {
+                      text: "Quarterly EPS"
+                    }
+                  },
+                  series: [
+                    {
+                      name: "Actual",
+                      type: "spline",
+                      data: actual,
+                    },
+                    {
+                      name: "Estimate",
+                      type: "spline",
+                      data: estimate,
+                    }
+                  ],
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <div id="chart"></div>
+    </body>
+</html>

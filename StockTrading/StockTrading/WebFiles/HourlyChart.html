@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://code.highcharts.com/stock/highstock.js"></script>
+        <script>
+            async function getHourlyChart(symbol, toTimestamp, color) {
+                let fromTimestamp = toTimestamp - 6 * 60 * 60;
+                let response = await fetch(`https://csci571hw8-chiahaol.appspot.com/finnhub/stockCandles?symbol=${symbol}&fromTimestamp=${fromTimestamp}&toTimestamp=${toTimestamp}&resolution=5`);
+                let data = await response.json();
+                let chartData = data.t.map((timestamp, i) => [timestamp * 1000, data.c[i]]);
+                
+                Highcharts.stockChart("chart", {
+                    rangeSelector: {
+                        enabled: false
+                    },
+                    title: {
+                        text: `${symbol} Hourly Price Variration`
+                    },
+                    plotOptions: {
+                        line: {
+                            color: color,
+                        }
+                    },
+                    xAxis: {
+                        type: 'datetime',
+                    },
+                    yAxis: {
+                        opposite: true,
+                        title: {
+                          text: null
+                        }
+                    },
+                    series: [
+                        {
+                          type: "line",
+                          name: symbol,
+                          data: chartData,
+                          showInLegend: false,
+                        },
+                    ],
+                    time: {
+                        timezone: 'America/Los_Angeles'
+                    },
+                    navigator: {
+                        enabled: false
+                    }
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <div id="chart"></div>
+    </body>
+</html>

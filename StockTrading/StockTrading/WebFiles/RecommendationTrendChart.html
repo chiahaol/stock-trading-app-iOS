@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://code.highcharts.com/highcharts.js"></script>
+        <script>
+            async function getRecommendationTrendChart(symbol) {
+                let response = await fetch(`https://csci571hw8-chiahaol.appspot.com/finnhub/recommendation?symbol=${symbol}`);
+                let data = await response.json();
+                let strongBuy = data.map(obj => obj.strongBuy);
+                let buy = data.map(obj => obj.buy);
+                let hold = data.map(obj => obj.hold);
+                let sell = data.map(obj => obj.sell);
+                let strongSell = data.map(obj => obj.strongSell);
+                let period = data.map(obj => obj.period.substring(0, 7));
+                
+                Highcharts.chart("chart", {
+                      rangeSelector: {
+                        enabled: false
+                      },
+                      title: {
+                          text: 'Recommendation Trends'
+                      },
+                      colors: ['#176f37', '#1db954', '#b98b1d', '#f45b5b', '#813131'],
+                      xAxis: {
+                          type: "category",
+                          categories: period,
+                          labels: {
+                              style: {
+                                  fontSize: "10px"
+                              }
+                          }
+                      },
+                      yAxis: {
+                          opposite: false,
+                          min: 0,
+                          title: {
+                              text: '#Analysis',
+                              align: 'high'
+                          },
+                          stackLabels: {
+                              enabled: false
+                          }
+                      },
+                      tooltip: {
+                          headerFormat: '<b>{point.x}</b><br/>',
+                          pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+                      },
+                      plotOptions: {
+                          column: {
+                              stacking: 'normal',
+                              dataLabels: {
+                                  enabled: true,
+                              }
+                          }
+                      },
+                      legend: {
+                          enabled: true,
+                          align: "left",
+                          x: 20,
+                          itemStyle: {
+                              fontSize: '10px'
+                          }
+                      },
+                      series: [{
+                          name: 'Strong Buy',
+                          type: 'column',
+                          data: strongBuy
+                      }, {
+                          name: 'Buy',
+                          type: 'column',
+                          data: buy
+                      }, {
+                          name: 'Hold',
+                          type: 'column',
+                          data: hold
+                      }, {
+                          name: 'Sell',
+                          type: 'column',
+                          data: sell
+                      }, {
+                          name: 'Strong Sell',
+                          type: 'column',
+                          data: strongSell
+                      }],
+                      navigator: {
+                          enabled : false
+                      },
+                      scrollbar: {
+                          enabled: false
+                      }
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <div id="chart"></div>
+    </body>
+</html>
